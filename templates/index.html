@@ -1,0 +1,29 @@
+{% extends 'base.html' %} {% block content %}
+<h3>{{ error }}</h3>
+<form action="">
+  <label for="departure_airport">Home Airport:</label>
+  <input
+    type="text"
+    name="departure_airport"
+    id="departure_airport"
+    placeholder="IATA Code (3 Letters)"
+  />
+  <label for="departure_date">Departure Date</label>
+  <input type="date" name="departure_date" id="departure_date" />
+  <label for="return_date">Return Date (optional)</label>
+  <input type="date" name="return_date" id="return_date" />
+  <label for="anytime">Anytime</label>
+  <input type="checkbox" name="anytime" id="anytime" />
+  <button type="submit" class="go">Go!</button>
+</form>
+
+{% endblock %}
+
+<div class="quote">
+  <h2 class="destination"></h2>
+  <h3 class="country"></h3>
+  <h3 class="iata"></h3>
+  <img src="" alt="" />
+  <h2 class="price"></h2>
+  <h3 class="carrier"></h3>
+</div>
