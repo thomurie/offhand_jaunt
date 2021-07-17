@@ -14,6 +14,9 @@ rapid_api = f'keys/rapid_api.txt'
 with open(rapid_api, 'r') as f:
     rapid_api_key = f.read()
 
-print(rapid_api_key)
-    
+unsplash_key = None
 
+unsplash_api = f'keys/unsplash.txt'
+
+with open(unsplash_api, 'r') as g:
+    unsplash_key = g.read()
