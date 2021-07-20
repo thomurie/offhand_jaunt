@@ -1,21 +1,54 @@
 const $form = $("form");
-const $departureDate = $("#departure_date");
-const $departureAirport = $("#departure_airport");
-const $returnDate = $("#return_date");
 const $body = $("body");
+const $departure = $("#departure_date");
+const $return = $("#return_date");
 
 // Features to add
+// Facebook Login
+// Environment variables
 // 2. watch flights
 // 3. API doesn't allow incorporation of price
 // allow user to watch flight, update user via email if flight
 // price is decreasing
+// 4. build City Name to IATA Code.
+// 5. Already Visited
+// 6. filter viewed and visited
+// 7. loading screen
+// 8. error
+// 9. convert iata_codes to .json
+
+// LANDING PAGE / FORM
+// sets the inital calendar values, min, and max calendar dates
+
+$departure.val(generateDate());
+$departure.attr("min", `${augmentDate(0, 0, 0)}`);
+$departure.attr("max", `${augmentDate(1, 0, 0)}`);
+
+$return.val(augmentDate());
+$return.attr("min", `${augmentDate(0, 0, 1)}`);
+$return.attr("max", `${augmentDate(1, 0, 5)}`);
 
 // SET DATE
-function generateDate(int) {
-  const today = new Date();
-  let yyyy = today.getFullYear();
-  let mm = today.getMonth() + 1;
-  let dd = today.getDate() + int;
+
+// validates date, ensures proper month/ year display
+function properDate(yyyy, mm, dd) {
+  const thirtyOne = [1, 3, 7, 8, 10, 12];
+  if (mm === 2 && dd > 28) {
+    dd = day - 28;
+    mm++;
+  } else if (thirtyOne.indexOf(mm) !== -1 && dd > 31) {
+    if (mm === 12) {
+      dd = dd - 31;
+      mm = 1;
+      yyyy++;
+    } else {
+      dd = dd - 31;
+      mm++;
+    }
+  } else if (dd > 30) {
+    dd = dd - 30;
+    mm++;
+  }
   if (dd < 10) {
     dd = `0${dd}`;
   }
@@ -25,10 +58,41 @@ function generateDate(int) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-$departureDate.val(generateDate(1));
-$returnDate.val(generateDate(6));
+// takes a date and modifies it by default 5 days.
+function augmentDate(y = 0, m = 0, d = 5) {
+  const date =
+    $departure.val() === undefined ? generateDate() : $departure.val();
+  const dateArr = date.split("-").map((element) => parseInt(element));
+  let yyyy, mm, dd;
+  [yyyy, mm, dd] = dateArr;
+  yyyy += y;
+  mm += m;
+  dd += d;
+  return properDate(yyyy, mm, dd);
+}
+
+// generates todays date
+function generateDate() {
+  const today = new Date();
+  let yyyy = parseInt(today.getFullYear());
+  let mm = parseInt(today.getMonth() + 1);
+  let dd = parseInt(today.getDate());
+
+  return properDate(yyyy, mm, dd);
+}
+
+// intelligently augments the reuturn date based on the input departure date
+// modifies the min for the reuturn date.
+function smartDate() {
+  $return.attr("min", `${augmentDate(0, 0, 0)}`);
+  return $return.val(augmentDate());
+}
+
+$form.on("click", "#return_date", smartDate);
 
 //  DISPLAY QUOTE
+
+// retrieve image from api
 async function getImage(str) {
   const response = await axios.post(`http://127.0.0.1:5000/image`, {
     data: str,
@@ -36,8 +100,8 @@ async function getImage(str) {
   return response.data;
 }
 
+// displays the quote in html
 async function displayQuote(obj) {
-  // TODO: query image API, return image URL
   $(".quote").html("");
   let destination = obj.flight.Places[0];
 
@@ -47,6 +111,7 @@ async function displayQuote(obj) {
 
   const image = await getImage(destination.CityName);
   const imageURL = image.results[0].urls.regular;
+  clicked = true;
   return $body.append(
     `<div class="quote">
         <h2 class="destination">${destination.CityName}</h2>
@@ -60,6 +125,7 @@ async function displayQuote(obj) {
 }
 
 // FLIGHT
+// gets the flight info from the api
 async function getFlight(userInput) {
   const response = await axios.post(`http://127.0.0.1:5000/flight`, {
     data: userInput,
@@ -68,6 +134,7 @@ async function getFlight(userInput) {
 }
 
 // VALID QUOTE
+// ensures that at least one(1) quote is returned from the api
 async function validQuote(obj) {
   let response = await getFlight(obj);
   while (response.Quotes.length < 1) {
@@ -77,33 +144,21 @@ async function validQuote(obj) {
 }
 
 // VALIDATE FORM DATA
+// verifies that the input is valid
 function validIataCode(str) {
   // TODO HANDLE INVALID CODES
   return str.split("").length === 3;
 }
 
-function validDates(d1, d2) {
-  // TODO: error message for invalid date entry
-  const today = parseInt(generateDate(0).split("-").join(""));
-  const date1 = parseInt(d1.split("-").join(""));
-  if (today <= date1) {
-    if (d2 === "anytime") {
-      return true;
-    }
-    const date2 = parseInt(d2.split("-").join(""));
-    return date1 < date2;
-  }
-  return false;
-}
-
+// verifies date
 function handleFormData() {
-  // TODO: handle invalid dates.
+  const $departureAirport = $("#departure_airport");
   let homeAirport = $departureAirport.val().toUpperCase();
   $departureAirport.val(homeAirport);
-  let inputDate = $departureDate.val();
+  let inputDate = $("#departure_date").val();
   let anytime = $("input:checked").length;
-  let inputReturnDate = anytime === 1 ? "anytime" : $returnDate.val();
-  if (validDates(inputDate, inputReturnDate) && validIataCode(homeAirport)) {
+  let inputReturnDate = anytime === 1 ? "anytime" : $("#return_date").val();
+  if (validIataCode(homeAirport)) {
     return {
       home: homeAirport,
       start: inputDate,
@@ -114,12 +169,16 @@ function handleFormData() {
 }
 
 // HANDLE SUBMIT
+let clicked = true;
+
 async function handleClick(evt) {
-  // TODO: prevent multiple requests
   evt.preventDefault();
-  data = handleFormData();
-  const response = await validQuote(data);
-  return displayQuote(response);
+  if (clicked === true) {
+    clicked = false;
+    data = handleFormData();
+    const response = await validQuote(data);
+    return displayQuote(response);
+  }
 }
 $form.on("click", ".go", handleClick);
 
