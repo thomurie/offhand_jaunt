@@ -2,7 +2,7 @@ const $form = $("form");
 const $body = $("body");
 const $departure = $("#departure_date");
 const $return = $("#return_date");
-
+const URL = "https://offhandjaunt.herokuapp.com/";
 // Features to add
 // 1a. Environment variables
 // 1b. Facebook Login
@@ -94,7 +94,7 @@ $form.on("click", "#return_date", smartDate);
 
 // retrieve image from api
 async function getImage(str) {
-  const response = await axios.post(`http://127.0.0.1:5000/image`, {
+  const response = await axios.post(`${URL}/image`, {
     data: str,
   });
   return response.data;
@@ -127,7 +127,7 @@ async function displayQuote(obj) {
 // FLIGHT
 // gets the flight info from the api
 async function getFlight(userInput) {
-  const response = await axios.post(`http://127.0.0.1:5000/flight`, {
+  const response = await axios.post(`${URL}/flight`, {
     data: userInput,
   });
   return response.data;
