@@ -2,7 +2,7 @@ import random
 import os
 from dotenv import load_dotenv
 
-project_folder = os.path.expanduser('/Users/thomasurie/Documents/Programming/Springboard/capstone_one/offhand_jaunt')
+project_folder = os.path.expanduser('/offhand_jaunt')
 load_dotenv(os.path.join(project_folder, '.env'))
 
 RAPID_KEY = os.getenv("RAPID_KEY")
