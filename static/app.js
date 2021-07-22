@@ -4,18 +4,18 @@ const $departure = $("#departure_date");
 const $return = $("#return_date");
 
 // Features to add
-// Facebook Login
-// Environment variables
+// 1a. Environment variables
+// 1b. Facebook Login
 // 2. watch flights
-// 3. API doesn't allow incorporation of price
-// allow user to watch flight, update user via email if flight
-// price is decreasing
 // 4. build City Name to IATA Code.
 // 5. Already Visited
 // 6. filter viewed and visited
 // 7. loading screen
 // 8. error
 // 9. convert iata_codes to .json
+// 10. API doesn't allow incorporation of price
+// allow user to watch flight, update user via email if flight
+// price is decreasing
 
 // LANDING PAGE / FORM
 // sets the inital calendar values, min, and max calendar dates
@@ -84,7 +84,7 @@ function generateDate() {
 // intelligently augments the reuturn date based on the input departure date
 // modifies the min for the reuturn date.
 function smartDate() {
-  $return.attr("min", `${augmentDate(0, 0, 0)}`);
+  $return.attr("min", `${augmentDate(0, 0, 1)}`);
   return $return.val(augmentDate());
 }
 
@@ -112,7 +112,7 @@ async function displayQuote(obj) {
   const image = await getImage(destination.CityName);
   const imageURL = image.results[0].urls.regular;
   clicked = true;
-  return $body.append(
+  return $(".quote").append(
     `<div class="quote">
         <h2 class="destination">${destination.CityName}</h2>
         <h3 class="country">${destination.CountryName}</h3>
@@ -186,3 +186,5 @@ $form.on("click", ".go", handleClick);
 function error1(msg) {
   console.error(msg);
 }
+
+// USER PROFILE

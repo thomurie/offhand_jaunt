@@ -1,5 +1,17 @@
 import random
-filename = f'iata_codes.txt'
+import os
+from dotenv import load_dotenv
+
+project_folder = os.path.expanduser('/Users/thomasurie/Documents/Programming/Springboard/capstone_one/offhand_jaunt')
+load_dotenv(os.path.join(project_folder, '.env'))
+
+RAPID_KEY = os.getenv("RAPID_KEY")
+UNSPLASH_KEY = os.getenv("UNSPLASH_KEY")
+DATABASE_URL = os.getenv("DATABASE_URL")
+FLASK_KEY=os.getenv("FLASK_KEY")
+
+filename = 'iata_codes.txt'
+
 with open(filename, 'r') as a:
         data = a.read().split()
 
@@ -8,22 +20,4 @@ def random_choice(arr):
     n = arr[random_index]
     return n
 
-rapid_api_key = None
 
-rapid_api = f'keys/rapid_api.txt'
-with open(rapid_api, 'r') as b:
-    rapid_api_key = b.read()
-
-unsplash_key = None
-
-unsplash_api = f'keys/unsplash.txt'
-
-with open(unsplash_api, 'r') as c:
-    unsplash_key = c.read()
-
-flask_key = None
-
-flask_file = f'keys/flask_key.txt'
-
-with open(flask_file, 'r') as d:
-    flask_key = d.read()

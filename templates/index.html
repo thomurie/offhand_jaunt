@@ -1,6 +1,5 @@
 {% extends 'base.html' %} {% block content %}
-<h3>{{ error }}</h3>
-<form action="">
+<form class="inputdata">
   <label for="departure_airport">Home Airport:</label>
   <input
     type="text"
@@ -17,13 +16,6 @@
   <button type="submit" class="go">Go!</button>
 </form>
 
-{% endblock %}
+<div class="quote"></div>
 
-<div class="quote">
-  <h2 class="destination"></h2>
-  <h3 class="country"></h3>
-  <h3 class="iata"></h3>
-  <img src="" alt="" />
-  <h2 class="price"></h2>
-  <h3 class="carrier"></h3>
-</div>
+{% endblock %}
