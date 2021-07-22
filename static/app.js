@@ -2,7 +2,7 @@ const $form = $("form");
 const $body = $("body");
 const $departure = $("#departure_date");
 const $return = $("#return_date");
-const URL = "https://offhandjaunt.herokuapp.com/";
+const URL = "https://offhandjaunt.herokuapp.com";
 // Features to add
 // 1a. Environment variables
 // 1b. Facebook Login
