@@ -10,7 +10,7 @@ import requests_oauthlib
 from requests_oauthlib.compliance_fixes import facebook_compliance_fix
 
 # local imports
-from models import connect_db, db, User
+from models import connect_db, db, User, Viewed
 from validation import random_choice, data, RAPID_KEY, UNSPLASH_KEY, DATABASE_URL, FLASK_KEY, FB_KEY, FB_ID
 
 FB_AUTHORIZATION_BASE_URL = "https://www.facebook.com/dialog/oauth"
@@ -39,6 +39,8 @@ def add_user_to_g():
 
     if CURR_USER_KEY in session:
         g.user = User.query.get(session[CURR_USER_KEY])
+        print('1111111')
+        print(g.user.viewed)
 
     else:
         g.user = None
@@ -54,7 +56,20 @@ def home():
 @app.route('/flight', methods=["POST"])
 def get_flight():
     resp = request.json
-    resp['data']['destination']= random_choice(data)
+    destination = random_choice(data)
+
+    if g.user:
+        viewed = [l.iata for l in g.user.viewed]
+        print('22222222222')
+        print(viewed)
+        while destination in viewed:
+            destination = random_choice(data)
+        add_dest = Viewed(user = g.user.email, location = destination)
+        db.session.add(add_dest)
+        db.session.commit()
+
+    resp['data']['destination']= destination
+
     if resp['data']['home'] in data:
         flight_data = requests.get(f"https://skyscanner-skyscanner-flight-search-v1.p.rapidapi.com/apiservices/browsequotes/v1.0/US/USD/en-US/{resp['data']['home']}-sky/{resp['data']['destination']}-sky/{resp['data']['start']}",
         params = { 'inboundpartialdate': resp['data']['end'] },
@@ -63,8 +78,7 @@ def get_flight():
       "x-rapidapi-host":
         "skyscanner-skyscanner-flight-search-v1.p.rapidapi.com",
         })
-
-        return flight_data.json();
+        return jsonify(flight_data = flight_data.json(), user_data = session[CURR_USER_KEY]);
     
     return jsonify(error = "Invalid Home Airport")
 
@@ -75,6 +89,12 @@ def get_destination_image():
     params = { 'client_id' : UNSPLASH_KEY, 'query': resp['data'], "orientation" : 'landscape'})
 
     return image_data.json()
+
+@app.route('/viewed', methods = ["POST"])
+def visited():
+    resp = request.json
+    redirect('/home')
+
 
 @app.route('/privacyPolicy')
 def show_privacy_policy():
@@ -121,6 +141,8 @@ def callback():
     name = facebook_user_data["name"]
     image_url = facebook_user_data.get("picture", {}).get("data", {}).get("url")
     user = User.query.filter(User.email == email).first()
+    print('1111111111')
+    print(user)
     if user == None:
         user = User(
         email=email,

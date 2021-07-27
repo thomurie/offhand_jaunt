@@ -1,21 +1,17 @@
 const $form = $("form");
+const $button = $("button");
 const $body = $("body");
 const $departure = $("#departure_date");
 const $return = $("#return_date");
-const URL = "https://offhandjaunt.herokuapp.com";
+const URL = "https://127.0.0.1:5000";
 // Features to add
-// 1a. Environment variables
-// 1b. Facebook Login
-// 2. watch flights
-// 4. build City Name to IATA Code.
-// 5. Already Visited
-// 6. filter viewed and visited
-// 7. loading screen
-// 8. error
-// 9. convert iata_codes to .json
-// 10. API doesn't allow incorporation of price
-// allow user to watch flight, update user via email if flight
-// price is decreasing
+// 1. viewed and visited*
+// 2. filter viewed and visited*
+// 3. watch flights
+// 4. build City Name to IATA Code*
+// 5. loading screen*
+// 6. error*
+// 7. convert iata_codes to .json
 
 // LANDING PAGE / FORM
 // sets the inital calendar values, min, and max calendar dates
@@ -109,11 +105,18 @@ async function displayQuote(obj) {
     destination = obj.flight.Places[1];
   }
 
+  let viewed = `<h4>Sign in to Optimize Results</h4>`;
+
+  if (obj.user !== "None") {
+    viewed = `<form><button class="go viewed">I've Been There</button></form>`;
+  }
+
   const image = await getImage(destination.CityName);
   const imageURL = image.results[0].urls.regular;
   clicked = true;
   return $(".quote").append(
     `<div class="quote">
+        ${viewed}
         <h2 class="destination">${destination.CityName}</h2>
         <h3 class="country">${destination.CountryName}</h3>
         <h3 class="iata">${destination.IataCode}</h3>
@@ -137,10 +140,10 @@ async function getFlight(userInput) {
 // ensures that at least one(1) quote is returned from the api
 async function validQuote(obj) {
   let response = await getFlight(obj);
-  while (response.Quotes.length < 1) {
+  while (response.flight_data.Quotes.length < 1) {
     response = await getFlight(obj);
   }
-  return { flight: response, input: obj };
+  return { flight: response.flight_data, input: obj, user: response.user_data };
 }
 
 // VALIDATE FORM DATA
