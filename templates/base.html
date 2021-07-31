@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="has-navbar-fixed-top">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -11,13 +11,87 @@
     />
   </head>
   <body>
+    <nav class="navbar is-transparent is-fixed-top" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand">
+        <a class="navbar-item" href="{{ url_for('home') }}">
+          <h1 class="title is-2">Offhand Jaunt</h1>
+        </a>
+    
+        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+    
+      <div class="navbar-menu">
+        <div class="navbar-end">
+          <a class="navbar-item" href="{{ url_for('home') }}">
+            Home
+          </a>
+          {% if user == None %}
+          <a class="navbar-item" href="{{  url_for('fb_login') }}">
+            Login
+          </a>
+          {% else %}
+          <a class="navbar-item" href="{{ url_for('user_profile') }}">
+            Profile
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
     <section class="section">
       <div class="container">{% block content %}{% endblock %}</div>
     </section>
-    <a href="{{ url_for('show_privacy_policy') }}">Privacy Policy</a>
-    <p></p>
-    <a href="{{ url_for('home') }}">Home</a>
-
+    <footer class="footer">
+      <div class="tile is-ancestor">
+        <div class="tile is-parent">
+          <div class="tile is-child box">
+            <p class="title">Offhand Jaunt</p>
+            <p class="subtitle">by Thomas U.</p>
+          </div>
+        </div>
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+              <a href="{{ url_for('home') }}">
+              <p class="title">Home</p>
+              <p class="subtitle">Click to Start Exploring</p>
+              </a>
+            </div>
+          </a>
+        </div>
+        {% if user == None %}
+        <div class="tile is-parent">
+          <div class="tile is-child box">
+            <a href="{{  url_for('fb_login') }}">
+            <p class="title">Login</p> 
+            <p class="subtitle">Click to Login</p>
+            </a>
+          </div>
+        </div>
+        {% else %}
+        <div class="tile is-parent">
+          <div class="tile is-child box">
+            <a href="{{ url_for('user_profile') }}">
+            <p class="title">Hello Explorer</p>
+            <p class="subtitle">Click to View Profile</p>
+            </a>
+          </div>
+        </div>
+        {% endif %}
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+              <a href="{{ url_for('show_privacy_policy') }}">
+              <p class="title">Privacy Policy</p>
+              <p class="subtitle">Click to View</p>
+              </a>
+            </div>
+          </a>
+        </div>
+      </div>
+    </footer>
+    <script src="https://kit.fontawesome.com/6724b070a2.js" crossorigin="anonymous"></script>
     <script
       src="https://code.jquery.com/jquery-3.6.0.slim.js"
       integrity="sha256-HwWONEZrpuoh951cQD1ov2HUK5zA5DwJ1DNUXaM6FsY="

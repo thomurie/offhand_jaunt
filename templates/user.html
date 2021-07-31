@@ -1,0 +1,115 @@
+{% extends 'base.html' %} {% block content %}
+<!-- IF LOGGED IN -->
+{% if user != None%}
+<!-- USER INFO -->
+<div class="box">
+  <article class="media">
+    <div class="media-left">
+      <figure class="image is-64x64">
+        <img class="is-rounded" src="{{ user.image_url}}" alt="Profile Image">
+      </figure>
+    </div>
+    <div class="media-content">
+      <div class="content">
+        <p>
+          <strong>{{ user.name }}</strong>
+        </p>
+        <p>
+          <a href="{{ url_for('logout') }}">
+            <button class="button is-warning">Log Out</button>
+          </a>
+        </p>
+      </div>
+    </div>
+  </article>
+</div>
+<!-- PROFILE INFORMATION -->
+<!-- Watching -->
+{% if all_watching_length > 0 %}
+<h3 class="title">Watched Flights</h3>
+<div class="table-container">
+  <table id='watched' class="table is-striped is-hoverable">
+    <thead>
+      <tr>
+        <th>Destination</th>
+        <th>Price</th>
+        <th>Update Price</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Stop Watching</th>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr>
+        <th>Destination</th>
+        <th>Price</th>
+        <th>Update Price</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Stop Watching</th>
+      </tr>
+    </tfoot>
+    <tbody>
+      {% for w in watching%}
+      <tr>
+        <td>{{ w.destination }}</td>
+        <td id="price">${{ w.price }}</td>
+        <td><button class="button is-info is-small" data-link="{{ w.id }}" id="update-price">Update Price</button></td>
+        <td>{{ w.start }}</td>
+        <td>{{ w.end }}</td>
+        <td><button id="stop-watching" data-link="{{ w.id }}" class="button is-warning is-small">Stop Watching</button></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+  <h3 class="title">No actively Watched Locations</h3>
+{% endif %}
+<!-- Viewed -->
+{% if length > 1 %}
+<h3 class="title">Viewed Locations</h3>
+  <h4 class="title is-4">The following have either been viewed or marked as visited</h4>
+  <h4 class="title is-4">To include these values please select the button below</h4>
+  <a href="{{ url_for('reset_viewed_visited') }}">
+    <button class='button is-warning'>Reset Viewed</button>
+  </a>
+<div class="table-container">
+  <table class="table is-striped is-hoverable">
+    <thead>
+      <tr>
+        <th>Destination</th>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr>
+        <th>Destination</th>
+      </tr>
+    </tfoot>
+    <tbody>
+      {% for v in user.viewed %}
+      <tr>
+        <td>{{ v.iata }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <a href="{{ url_for('reset_viewed_visited') }}">
+    <button class='button is-warning'>Reset Viewed</button>
+  </a>
+</div>
+{% endif %}
+<div class="box">
+  <a href="{{ url_for('logout') }}">
+    <button class="button is-warning">Log Out</button>
+  </a>
+</div>
+
+<!-- IF USER LOGGED OUT -->
+{% else %}
+  <a href="{{  url_for('fb_login') }}"
+    ><button class="button is-info">Login</button></a
+  >
+{% endif%}
+</div>
+{% endblock %}

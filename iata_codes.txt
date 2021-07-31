@@ -96,5 +96,4 @@
  FUK 
  TAO 
  BNE 
- 100 
  WUH 
