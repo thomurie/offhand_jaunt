@@ -4,7 +4,7 @@ const $quote = $("#quote");
 const $departure = $("#departure_date");
 const $return = $("#return_date");
 const $watched = $("#watched");
-const URL = "https://127.0.0.1:5000";
+const URL = "https://offhandjaunt.herokuapp.com";
 let userFlightData = null;
 
 // LANDING PAGE / FORM

@@ -18,7 +18,7 @@ FB_TOKEN_URL = "https://graph.facebook.com/oauth/access_token"
 FB_SCOPE = ["email"]
 
 # App Data
-URL = "https://127.0.0.1:5000"
+URL = "https://offhandjaunt.herokuapp.com"
 CURR_USER_KEY = "curr_user"
 
 app = Flask(__name__)
