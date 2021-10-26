@@ -18,7 +18,7 @@ FB_TOKEN_URL = "https://graph.facebook.com/oauth/access_token"
 FB_SCOPE = ["email"]
 
 # App Data
-URL = "https://offhandjaunt.herokuapp.com"
+URL = "https://127.0.0.1:5000"
 CURR_USER_KEY = "curr_user"
 
 app = Flask(__name__)
@@ -431,6 +431,10 @@ def callback():
     facebook_user_data = facebook.get(
         "https://graph.facebook.com/me?fields=id,name,email,picture{url}"
     ).json()
+
+    print(facebook_user_data)
+
+
 
     email = facebook_user_data["email"]
     name = facebook_user_data["name"]
