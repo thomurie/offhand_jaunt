@@ -1,5 +1,6 @@
 # standard libraries
 import json
+import random
 from datetime import datetime
 
 # third party libraries
@@ -67,8 +68,39 @@ def home():
     Returns:
         render_template: 'index.html'
     """
+    print(random_home)
+    quote_data = {
+        "home" : {
+            "city" : "New York City",
+            "iata": "JFK",
+            "country": "USA",
+        },
+        "destination" : {
+            "city" : "test",
+            "iata": "test",
+            "country": "test",
+        }, 
+        "input" : {
+            "start": "test",
+            "end": "test",
+            "home": "test", 
+        }, 
+        "iata":"test",
+        "price":"test",
+        "carrier":"test",
+        "url": URL,
+    }
 
-    return render_template('index.html', user = g.user, quote = None)
+    # user_input = { 
+    #         'home': quote_data['home']['city'],
+    #         'destination': destination,
+    #         'start': start,
+    #         'end': end,
+    #     }
+
+    # quote = json.loads(flight_api_query(user_input))
+    # print(quote)
+    return render_template('index.html', user = g.user, quote = quote_data)
 
 #SIGN OUT
 @app.route('/logout', methods = ['GET'])
@@ -110,12 +142,34 @@ def share_link(home, destination, start, end):
             'end': end,
         }
     quote = json.loads(flight_api_query(user_input))
-    print(quote['flight_data']['Carriers'][0]['Name'])
     destination = quote['flight_data']['Places'][0]
     if user_input['home'] == quote['flight_data']['Places'][0]['IataCode']:
         destination = quote['flight_data']['Places'][1]
 
     image = (image_api_query(destination["CityName"]))
+
+#     quote = {
+#     "home" : {
+#         "city" : "",
+#         "iata": "",
+#         "country": "",
+#     },
+#     "destination" : {
+#         "city" : "",
+#         "iata": "",
+#         "country": "",
+#     }, 
+#     "input" : {
+#         "start": "",
+#         "end": "",
+#         "home": "", 
+
+#     }, 
+#     "iata":"",
+#     "price":"",
+#     "carrier":"",
+#     "url": URL,
+# }
 
     quote_data = {
         'input': user_input,

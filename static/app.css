@@ -1,0 +1,43 @@
+/* NAVBAR */
+h1.title {
+  color: #485fc7;
+}
+
+#from {
+  color: white;
+}
+
+/* HEADER */
+section.hero {
+  /* background-color: #dff3e4; */
+  background-position: bottom right;
+  background-size: 100%;
+}
+
+@media only screen and (max-width: 400px) {
+  section.hero {
+    background-size: auto 100%;
+  }
+}
+
+/* QUOTE */
+section#quote {
+  background-color: #485fc7;
+}
+
+/* FOOTER */
+footer.footer {
+  background-color: #384b7a;
+}
+footer p.title,
+footer p.subtitle {
+  color: white;
+}
+
+/* COMPONENTS */
+.button.is-primary {
+  background-color: #162e6b;
+}
+.button.is-primary:hover {
+  background-color: #12275a;
+}
