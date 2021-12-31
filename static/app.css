@@ -1,3 +1,5 @@
+/* COLOR PALLETE https://coolors.co/162e6b-c1c6d4-606475-485fc7-384b7a */
+
 /* NAVBAR */
 h1.title {
   color: #485fc7;
@@ -9,7 +11,6 @@ h1.title {
 
 /* HEADER */
 section.hero {
-  /* background-color: #dff3e4; */
   background-position: bottom right;
   background-size: 100%;
 }

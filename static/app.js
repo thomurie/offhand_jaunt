@@ -54,7 +54,7 @@ function properDate(yyyy, mm, dd) {
   }
   const thirtyOne = [1, 3, 7, 8, 10, 12];
   if (mm === 2 && dd > 28) {
-    dd = day - 28;
+    dd = dd - 28;
     mm++;
   } else if (thirtyOne.indexOf(mm) !== -1 && dd > 31) {
     dd = dd - 31;
@@ -160,7 +160,9 @@ async function displayQuote(obj) {
   $homeCountry.text(home.CountryName);
   $startDate.text(obj.input.start);
   $destCity.text(destination.CityName);
-  $destIata.html(`<i class="fas fa-plane-arrival"></i> ${home.IataCode}`);
+  $destIata.html(
+    `<i class="fas fa-plane-arrival"></i> ${destination.IataCode}`
+  );
   $destCountry.text(destination.CountryName);
   $endDate.text(obj.input.end);
   $price.text(`$${obj.flight.Quotes[0].MinPrice}`);
@@ -339,7 +341,6 @@ async function updateWatchedFlight(evt) {
 function copyLink(evt) {
   evt.preventDefault();
   const $element = $(evt.target);
-  console.log($element.val());
   const $url = $element.attr("data-link");
   const $temp = $("<input>");
   $quote.append($temp);

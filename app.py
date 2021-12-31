@@ -1,7 +1,6 @@
 # standard libraries
 import json
-import random
-from datetime import datetime
+import datetime
 
 # third party libraries
 from flask import Flask, render_template, redirect, session, jsonify, g, request, url_for
@@ -12,6 +11,7 @@ from requests_oauthlib.compliance_fixes import facebook_compliance_fix
 # local imports
 from models import Watching, connect_db, db, User, Viewed, Watching
 from validation import flight_api_query, random_choice, iata_data, image_api_query, DATABASE_URL, FLASK_KEY, FB_KEY, FB_ID
+from helpers import properDate
 
 # Facebook Login
 FB_AUTHORIZATION_BASE_URL = "https://www.facebook.com/dialog/oauth"
@@ -68,7 +68,11 @@ def home():
     Returns:
         render_template: 'index.html'
     """
-    print(random_home)
+    today = datetime.datetime.now()
+
+    x = properDate(datetime.datetime.now(), 1)
+
+    print(x.strftime("%x"))
     quote_data = {
         "home" : {
             "city" : "New York City",
@@ -76,13 +80,13 @@ def home():
             "country": "USA",
         },
         "destination" : {
-            "city" : "test",
-            "iata": "test",
+            "city" : "London",
+            "iata": "LHR",
             "country": "test",
         }, 
         "input" : {
-            "start": "test",
-            "end": "test",
+            "start": properDate(datetime.datetime.now(), 1).strftime("%x"),
+            "end": properDate().strftime("%x"),
             "home": "test", 
         }, 
         "iata":"test",
