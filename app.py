@@ -1,6 +1,6 @@
 # standard libraries
 import json
-from datetime import datetime
+import datetime
 
 # third party libraries
 from flask import Flask, render_template, redirect, session, jsonify, g, request, url_for
@@ -11,6 +11,7 @@ from requests_oauthlib.compliance_fixes import facebook_compliance_fix
 # local imports
 from models import Watching, connect_db, db, User, Viewed, Watching
 from validation import flight_api_query, random_choice, iata_data, image_api_query, DATABASE_URL, FLASK_KEY, FB_KEY, FB_ID
+from helpers import properDate
 
 # Facebook Login
 FB_AUTHORIZATION_BASE_URL = "https://www.facebook.com/dialog/oauth"
@@ -18,7 +19,7 @@ FB_TOKEN_URL = "https://graph.facebook.com/oauth/access_token"
 FB_SCOPE = ["email"]
 
 # App Data
-URL = "https://offhandjaunt.herokuapp.com"
+URL = "https://127.0.0.1:5000"
 CURR_USER_KEY = "curr_user"
 
 app = Flask(__name__)
@@ -67,8 +68,43 @@ def home():
     Returns:
         render_template: 'index.html'
     """
+    today = datetime.datetime.now()
 
-    return render_template('index.html', user = g.user, quote = None)
+    x = properDate(datetime.datetime.now(), 1)
+
+    print(x.strftime("%x"))
+    quote_data = {
+        "home" : {
+            "city" : "New York City",
+            "iata": "JFK",
+            "country": "USA",
+        },
+        "destination" : {
+            "city" : "London",
+            "iata": "LHR",
+            "country": "test",
+        }, 
+        "input" : {
+            "start": properDate(datetime.datetime.now(), 1).strftime("%x"),
+            "end": properDate().strftime("%x"),
+            "home": "test", 
+        }, 
+        "iata":"test",
+        "price":"test",
+        "carrier":"test",
+        "url": URL,
+    }
+
+    # user_input = { 
+    #         'home': quote_data['home']['city'],
+    #         'destination': destination,
+    #         'start': start,
+    #         'end': end,
+    #     }
+
+    # quote = json.loads(flight_api_query(user_input))
+    # print(quote)
+    return render_template('index.html', user = g.user, quote = quote_data)
 
 #SIGN OUT
 @app.route('/logout', methods = ['GET'])
@@ -110,12 +146,34 @@ def share_link(home, destination, start, end):
             'end': end,
         }
     quote = json.loads(flight_api_query(user_input))
-    print(quote['flight_data']['Carriers'][0]['Name'])
     destination = quote['flight_data']['Places'][0]
     if user_input['home'] == quote['flight_data']['Places'][0]['IataCode']:
         destination = quote['flight_data']['Places'][1]
 
     image = (image_api_query(destination["CityName"]))
+
+#     quote = {
+#     "home" : {
+#         "city" : "",
+#         "iata": "",
+#         "country": "",
+#     },
+#     "destination" : {
+#         "city" : "",
+#         "iata": "",
+#         "country": "",
+#     }, 
+#     "input" : {
+#         "start": "",
+#         "end": "",
+#         "home": "", 
+
+#     }, 
+#     "iata":"",
+#     "price":"",
+#     "carrier":"",
+#     "url": URL,
+# }
 
     quote_data = {
         'input': user_input,
@@ -431,6 +489,10 @@ def callback():
     facebook_user_data = facebook.get(
         "https://graph.facebook.com/me?fields=id,name,email,picture{url}"
     ).json()
+
+    print(facebook_user_data)
+
+
 
     email = facebook_user_data["email"]
     name = facebook_user_data["name"]

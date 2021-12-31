@@ -1,10 +1,28 @@
+const URL = "http://127.0.0.1:5000";
+
+// INDEX.HTML ELEMENTS
 const $form = $("#inputdata");
 const $button = $("button");
 const $quote = $("#quote");
 const $departure = $("#departure_date");
 const $return = $("#return_date");
+const $section = $("#header");
 const $watched = $("#watched");
-const URL = "https://offhandjaunt.herokuapp.com";
+const $prompt = $("#prompt");
+
+// QUOTE
+const $homeCity = $("#home_city");
+const $homeIata = $("#home_iata");
+const $homeCountry = $("#home_country");
+const $startDate = $("#start_date");
+const $destCity = $("#dest_city");
+const $destIata = $("#dest_iata");
+const $destCountry = $("#dest_country");
+const $endDate = $("#end_date");
+const $price = $("#price");
+const $carrier = $("#carrier");
+const $buttons = $("#buttons");
+
 let userFlightData = null;
 
 // LANDING PAGE / FORM
@@ -36,7 +54,7 @@ function properDate(yyyy, mm, dd) {
   }
   const thirtyOne = [1, 3, 7, 8, 10, 12];
   if (mm === 2 && dd > 28) {
-    dd = day - 28;
+    dd = dd - 28;
     mm++;
   } else if (thirtyOne.indexOf(mm) !== -1 && dd > 31) {
     dd = dd - 31;
@@ -82,8 +100,8 @@ function generateDate() {
   return properDate(yyyy, mm, dd);
 }
 
-// intelligently augments the reuturn date based on the input departure date
-// modifies the min for the reuturn date.
+// intelligently augments the return date based on the input departure date
+// modifies the min for the return date.
 function smartDate() {
   inputDeparture = $departure.val().split("-").join("");
   inputReturn = $return.val().split("-").join("");
@@ -106,44 +124,65 @@ async function getImage(str) {
   const response = await axios.post(`${URL}/image`, {
     data: str,
   });
+  console.log(response.data);
   return response.data;
 }
 
 // displays the quote in html
 async function displayQuote(obj) {
-  $quote.html("");
+  // $quote.html("");
   let destination =
     obj.input.home === obj.flight.Places[0].IataCode
       ? obj.flight.Places[1]
       : obj.flight.Places[0];
 
-  let viewed = `<h5 class="title is-5">Login to Optimize Results</h5>`;
-  let watched = `<h5 class="title is-5">Login to Watch Flights</h5>`;
+  let home =
+    obj.input.home === obj.flight.Places[0].IataCode
+      ? obj.flight.Places[0]
+      : obj.flight.Places[1];
+
+  let viewed = `disabled`;
+  let watched = `disabled`;
+  let loggedOut = `<a href="${URL}/fb-login" class="button is-primary is-fullwidth mb-3">Login to Optimize Result</a>`;
 
   if (obj.user !== "Guest") {
-    viewed = `<a id="viewed" class="button is-warning">I've Been There</a>`;
-    watched = `<a id="watch" data-clicked="false" class="button is-primary">Watch this Flight</a>`;
+    viewed = ``;
+    watched = ``;
+    loggedOut = ``;
   }
 
   const image = await getImage(destination.CityName);
   const using_image = image.results[3];
-  clicked = true;
+  $section.css("background-image", `url('${using_image.urls.regular}')`);
+
+  $homeCity.text(home.CityName);
+  $homeIata.html(`<i class="fas fa-plane-departure"></i> ${home.IataCode}`);
+  $homeCountry.text(home.CountryName);
+  $startDate.text(obj.input.start);
+  $destCity.text(destination.CityName);
+  $destIata.html(
+    `<i class="fas fa-plane-arrival"></i> ${destination.IataCode}`
+  );
+  $destCountry.text(destination.CountryName);
+  $endDate.text(obj.input.end);
+  $price.text(`$${obj.flight.Quotes[0].MinPrice}`);
+  $carrier.text(`by: ${obj.flight.Carriers[0].Name}`);
+  $prompt.hide();
   loading();
-  return $quote.append(
-    `<div class="tile is-child box">
-      <p class="title" id="cityname">${destination.CityName}</p>
-      <p class="subtitle" id="country">${destination.CountryName}</p>
-      <p class="title" id="price">$${obj.flight.Quotes[0].MinPrice}</p>
-      <p class="subtitle" id="date">${obj.input.start} - ${obj.input.end}</p>
-      <p class="subtitle" id="iata"> To: ${destination.IataCode} By: ${obj.flight.Carriers[0].Name}</p>
-    </div>
-    <div class="tile is-child box" id="dimage">
-      <figure class="image image is-5by4">
-        <a href="${using_image.urls.regular}">
-          <img id="location_image" src="${using_image.urls.regular}">
-        </a>
-      </figure>
-      <p class="subtitle" id="artist">Photo by
+  clicked = true;
+
+  return $buttons.html(
+    `<button class="button is-link is-fullwidth mb-3" id="share" data-link="${URL}/share/${obj.input.home}/${destination.IataCode}/${obj.input.start}/${obj.input.end}">
+        Share Flight
+       </button>
+       <button id="viewed" class="button is-info is-fullwidth mb-3" ${viewed}>
+         I've Been There
+       </button>
+       <button id="watch" data-clicked="false" class="button is-light is-fullwidth mb-3" ${watched}>
+         Watch this Flight
+       </button>
+       ${loggedOut}
+       <p class="subtitle" id="artist">Photo by
         <a href="${using_image.user.links.html}?utm_source=offhand_jaunt&utm_medium=referral">
           ${using_image.user.name}
         </a>
@@ -152,21 +191,7 @@ async function displayQuote(obj) {
         Unsplash
         </a>
       </p>
-    </div>
-    <div class="tile is-child box" id="dimage">
-    <div class="columns is-multiline is-mobile">
-    <div class="column">
-    <a class="button is-info" id="share" data-link="${URL}/share/${obj.input.home}/${destination.IataCode}/${obj.input.start}/${obj.input.end}">Share Flight</a>
-    </div>
-    <div class="column">
-      ${viewed}
-    </div>
-    <div class="column">
-      ${watched}
-    </div>
-    </div>
-    </div>
-   `
+    `
   );
 }
 
@@ -176,6 +201,7 @@ async function getFlight(userInput) {
   const response = await axios.post(`${URL}/flight`, {
     data: userInput,
   });
+  console.log(response.data);
   return response.data;
 }
 
@@ -183,8 +209,12 @@ async function getFlight(userInput) {
 // ensures that at least one(1) quote is returned from the api
 async function validQuote(obj) {
   let response = await getFlight(obj);
+  console.log(response);
   if (response.error == false) {
-    while (response.flight_data.Quotes.length < 1) {
+    while (
+      !response.flight_data.Quotes ||
+      response.flight_data.Quotes.length < 1
+    ) {
       response = await getFlight(obj);
     }
     return {
@@ -311,7 +341,6 @@ async function updateWatchedFlight(evt) {
 function copyLink(evt) {
   evt.preventDefault();
   const $element = $(evt.target);
-  console.log($element.val());
   const $url = $element.attr("data-link");
   const $temp = $("<input>");
   $quote.append($temp);
@@ -349,3 +378,44 @@ function error1() {
   $help.toggleClass("is-danger");
   return $help.text(`Invalid IATA Code`);
 }
+
+{
+  /* <p class="title" id="cityname">${home.CityName} <i class="fas fa-plane"></i> ${destination.CityName}</p>
+      <p class="title" id="cityname">${destination.CityName}</p>
+      <p class="subtitle" id="country">${destination.CountryName}</p>
+      <p class="title" id="price">$${obj.flight.Quotes[0].MinPrice}</p>
+      <p class="subtitle" id="date">
+        ${obj.input.start} through ${obj.input.end}
+      </p>
+      <p class="subtitle" id="iata">
+      To: ${destination.IataCode} By: ${obj.flight.Carriers[0].Name}
+      </p> */
+}
+
+{
+  /* <p class="subtitle" id="artist">Photo by
+        <a href="${using_image.user.links.html}?utm_source=offhand_jaunt&utm_medium=referral">
+          ${using_image.user.name}
+        </a>
+        on
+        <a href="https://unsplash.com/?utm_source=offhand_jaunt&utm_medium=referral">
+        Unsplash
+        </a>
+      </p> */
+}
+
+// <!-- SHARE -->
+//   <div class="tile is-parent">
+//     <article class="tile is-child box justify-content-center">
+//       <button class="button is-link is-fullwidth mb-3" id="share" data-link="${URL}/share/${obj.input.home}/${destination.IataCode}/${obj.input.start}/${obj.input.end}">
+//         Share Flight
+//       </button>
+//       <button id="viewed" class="button is-info is-fullwidth mb-3" ${viewed}>
+//         I've Been There
+//       </button>
+//       <button id="watch" data-clicked="false" class="button is-light is-fullwidth mb-3" ${watched}>
+//         Watch this Flight
+//       </button>
+//       ${loggedOut}
+//     </article>
+//   </div>

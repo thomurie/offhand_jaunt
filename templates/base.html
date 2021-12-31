@@ -9,30 +9,30 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"
     />
+    <link rel="stylesheet" href="../static/app.css" />
   </head>
   <body>
-    <nav class="navbar is-transparent is-fixed-top" role="navigation" aria-label="main navigation">
+    <!-- NEW NAV -->
+    <nav class="navbar is-white is-fixed-top">
       <div class="navbar-brand">
         <a class="navbar-item" href="{{ url_for('home') }}">
-          <h1 class="title is-2">Offhand Jaunt</h1>
+          <h1 class="title">Offhand Jaunt</h1>
         </a>
-    
-        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-        </a>
+        <div
+          class="navbar-burger"
+          data-target="navbarExampleTransparentExample"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
-    
-      <div class="navbar-menu">
-        <div class="navbar-end">
-          <a class="navbar-item" href="{{ url_for('home') }}">
-            Home
-          </a>
+
+      <div id="navbarExampleTransparentExample" class="navbar-menu">
+        <div class="navbar-start">
+          <a class="navbar-item" href="{{ url_for('home') }}"> Home </a>
           {% if user == None %}
-          <a class="navbar-item" href="{{  url_for('fb_login') }}">
-            Login
-          </a>
+          <a class="navbar-item" href="{{  url_for('fb_login') }}"> Login </a>
           {% else %}
           <a class="navbar-item" href="{{ url_for('user_profile') }}">
             Profile
@@ -41,57 +41,50 @@
         </div>
       </div>
     </nav>
-    <section class="section">
-      <div class="container">{% block content %}{% endblock %}</div>
-    </section>
+
+    <!-- BODY -->
+    {% block content %}{% endblock %}
+
+    <!-- FOOTER -->
     <footer class="footer">
-      <div class="tile is-ancestor">
-        <div class="tile is-parent">
-          <div class="tile is-child box">
-            <p class="title">Offhand Jaunt</p>
-            <p class="subtitle">by Thomas U.</p>
-          </div>
+      <div class="columns">
+        <div class="column">
+          <p class="title">Offhand Jaunt</p>
+          <p class="subtitle">Travel Randomly, <br />Experience Organically</p>
         </div>
-        <div class="tile is-parent">
-            <div class="tile is-child box">
-              <a href="{{ url_for('home') }}">
-              <p class="title">Home</p>
-              <p class="subtitle">Click to Start Exploring</p>
-              </a>
-            </div>
+        <div class="column">
+          <a href="{{ url_for('home') }}">
+            <p class="title">Home</p>
+            <p class="subtitle">Click to Start Exploring</p>
           </a>
         </div>
-        {% if user == None %}
-        <div class="tile is-parent">
-          <div class="tile is-child box">
-            <a href="{{  url_for('fb_login') }}">
-            <p class="title">Login</p> 
+        <div class="column">
+          {% if user == None %}
+          <a href="{{  url_for('fb_login') }}">
+            <p class="title">Login</p>
             <p class="subtitle">Click to Login</p>
-            </a>
-          </div>
-        </div>
-        {% else %}
-        <div class="tile is-parent">
-          <div class="tile is-child box">
-            <a href="{{ url_for('user_profile') }}">
+          </a>
+          {% else %}
+          <a href="{{ url_for('user_profile') }}">
             <p class="title">Hello Explorer</p>
             <p class="subtitle">Click to View Profile</p>
-            </a>
-          </div>
+          </a>
+          {% endif %}
         </div>
-        {% endif %}
-        <div class="tile is-parent">
-            <div class="tile is-child box">
-              <a href="{{ url_for('show_privacy_policy') }}">
-              <p class="title">Privacy Policy</p>
-              <p class="subtitle">Click to View</p>
-              </a>
-            </div>
+        <div class="column">
+          <a href="{{ url_for('show_privacy_policy') }}">
+            <p class="title">Privacy Policy</p>
+            <p class="subtitle">Click to View</p>
           </a>
         </div>
       </div>
     </footer>
-    <script src="https://kit.fontawesome.com/6724b070a2.js" crossorigin="anonymous"></script>
+
+    <!-- SCRIPTS -->
+    <script
+      src="https://kit.fontawesome.com/6724b070a2.js"
+      crossorigin="anonymous"
+    ></script>
     <script
       src="https://code.jquery.com/jquery-3.6.0.slim.js"
       integrity="sha256-HwWONEZrpuoh951cQD1ov2HUK5zA5DwJ1DNUXaM6FsY="
