@@ -18,9 +18,9 @@ class Locations(db.Model):
 
     name = db.Column(db.String(100), nullable = True)
 
-class Viewed(db.Model):
+class Visited(db.Model):
 
-    __tablename__ = 'viewed'
+    __tablename__ = 'visited'
 
     id = db.Column(db.Integer, autoincrement =True, primary_key = True)
 
@@ -76,6 +76,18 @@ class User(db.Model):
 
     image_url = db.Column(db.String(10000), nullable = True, default = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCDe5JZ_HkfuU5VFQDlF0j1jeCl-SCj_mJdA&usqp=CAU')
 
-    viewed = db.relationship("Locations", secondary = "viewed")
+    visited = db.relationship("Locations", secondary = "visited ")
 
     watching = db.relationship('Locations', secondary = "watching")
+
+    visited = db.relationship(
+        "visted", back_populates="visited",
+        cascade='all, delete, delete-orphan',
+        passive_deletes=True
+    )
+
+    favorites = db.relationship(
+        "Locations", back_populates="locations",
+        cascade='all, delete, delete-orphan',
+        passive_deletes=True
+    )

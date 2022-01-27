@@ -4,19 +4,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Offhand Jaunt</title>
-    <link rel="shortcut icon" href="" type="image/x-icon" />
+    <link
+      rel="shortcut icon"
+      href="{{ url_for('static', filename='images/favicon.ico') }}"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"
     />
-    <link rel="stylesheet" href="../static/app.css" />
+    <link rel="stylesheet" href="/static/app.css" />
   </head>
   <body>
     <!-- NEW NAV -->
     <nav class="navbar is-white is-fixed-top">
       <div class="navbar-brand">
         <a class="navbar-item" href="{{ url_for('home') }}">
-          <h1 class="title">Offhand Jaunt</h1>
+          <h1 class="title cursive">Offhand Jaunt</h1>
         </a>
         <div
           class="navbar-burger"
@@ -32,7 +41,8 @@
         <div class="navbar-start">
           <a class="navbar-item" href="{{ url_for('home') }}"> Home </a>
           {% if user == None %}
-          <a class="navbar-item" href="{{  url_for('fb_login') }}"> Login </a>
+          <!-- <a class="navbar-item" href="{{  url_for('fb_login') }}"> Login </a> -->
+          <a class="navbar-item" href="{{  url_for('login') }}"> Login </a>
           {% else %}
           <a class="navbar-item" href="{{ url_for('user_profile') }}">
             Profile
@@ -55,26 +65,22 @@
         <div class="column">
           <a href="{{ url_for('home') }}">
             <p class="title">Home</p>
-            <p class="subtitle">Click to Start Exploring</p>
           </a>
         </div>
         <div class="column">
           {% if user == None %}
           <a href="{{  url_for('fb_login') }}">
             <p class="title">Login</p>
-            <p class="subtitle">Click to Login</p>
           </a>
           {% else %}
           <a href="{{ url_for('user_profile') }}">
             <p class="title">Hello Explorer</p>
-            <p class="subtitle">Click to View Profile</p>
           </a>
           {% endif %}
         </div>
         <div class="column">
           <a href="{{ url_for('show_privacy_policy') }}">
             <p class="title">Privacy Policy</p>
-            <p class="subtitle">Click to View</p>
           </a>
         </div>
       </div>
@@ -91,6 +97,6 @@
       crossorigin="anonymous"
     ></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="/static/app.js" defer></script>
+    {% block jsScript %}{% endblock %}
   </body>
 </html>

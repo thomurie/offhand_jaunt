@@ -1,0 +1,155 @@
+{% extends 'base.html' %} {% block content %}
+<!-- HEADER -->
+<section
+  class="hero is-medium"
+  id="header"
+  style=" background-image: url({{quote.image_url}});"
+>
+  <div class="hero-body">
+    <div class="container">
+      <p class="title is-4" id="prompt">Where Are You Leaving From?</p>
+      <div class="field is-horizontal">
+        <div class="field-body" id="inputdata">
+          <!-- Departure Airport (text) -->
+          <div class="field">
+            <p class="control is-expanded has-icons-right">
+              <input
+                class="input"
+                type="text"
+                placeholder="IATA Code (3 Letters)"
+                id="departure_airport"
+              />
+              <span class="icon is-small is-right">
+                <i class="fas fa-plane-departure"></i>
+              </span>
+            </p>
+          </div>
+          <!-- Departure Date (date) -->
+          <div class="field">
+            <p class="control is-expanded">
+              <input class="input" type="date" id="departure_date" />
+            </p>
+          </div>
+          <!-- Return Date (date) -->
+          <div class="field">
+            <p class="control is-expanded">
+              <input class="input" type="date" id="return_date" />
+            </p>
+          </div>
+          <!-- Send Form Data to App.js (button) -->
+          <div class="field">
+            <p class="control">
+              <button id="go" class="button is-link is-fullwidth">
+                <span class="icon is-small is-right">
+                  <i class="fas fa-search"></i>
+                </span>
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE NEW NEW -->
+<section class="section" id="quote">
+  <div class="tile is-parent is-vertical">
+    <article class="tile is-child box">
+      <p class="title is-4">We'll Give You a Destination!</p>
+      <div class="columns">
+        <div class="column">
+          <p class="title" id="home_city">{{ quote.home.city }}</p>
+          <p class="subtitle" id="home_iata">
+            <i class="fas fa-plane-departure"></i> {{ quote.home.iata }}
+          </p>
+          <p class="title is-4" id="home_country">{{ quote.home.country }}</p>
+          <p class="subtitle" id="start_date">
+            Departure Date: {{ quote.input.start }}
+          </p>
+        </div>
+        <div class="column is-one-fifth">
+          <p class="title"><i class="fas fa-plane"></i> To</p>
+        </div>
+        <div class="column">
+          <p class="title" id="dest_city">{{ quote.destination.city}}</p>
+          <p class="subtitle" id="dest_iata">
+            <i class="fas fa-plane-arrival"></i> {{ quote.destination.iata }}
+          </p>
+          <p class="title is-4" id="dest_country">
+            {{ quote.destination.country }}
+          </p>
+          <p class="subtitle" id="end_date">
+            Return Date: {{ quote.input.end }}
+          </p>
+        </div>
+        <div class="column">
+          <p class="title" id="price">${{ quote.price }}</p>
+          <p class="subtitle">Roundtrip, Per Traveler</p>
+          <p class="subtitle" id="carrier">By: {{ quote.carrier }}</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- BUTTONS -->
+
+    <article class="tile is-child box" id="buttons">
+      <button
+        class="button is-link is-fullwidth mb-3"
+        id="share"
+        data-link="{{ quote.url }}/share/{{ quote.input.home }}/{{ quote.iata }}/{{ quote.input.start }}/{{ quote.input.end }}"
+      >
+        Share Flight
+      </button>
+
+      <!-- LOGGED IN USERS -->
+      {% if user != None %}
+      <button id="viewed" class="button is-info is-fullwidth mb-3">
+        I've Been There
+      </button>
+      <button
+        id="watch"
+        data-clicked="false"
+        class="button is-light is-fullwidth mb-3"
+      >
+        Watch this Flight
+      </button>
+
+      <!-- LOGGED OUT USERS -->
+      {% else %}
+      <button id="viewed" class="button is-info is-fullwidth mb-3" disabled>
+        I've Been There
+      </button>
+      <button
+        id="watch"
+        data-clicked="false"
+        class="button is-light is-fullwidth mb-3"
+        disabled
+      >
+        Watch this Flight
+      </button>
+      <a
+        href="{{ url_for('fb_login') }}"
+        class="button is-primary is-fullwidth mb-3"
+        >Login to Optimize Result</a
+      >
+
+      {% endif %}
+      <p class="subtitle" id="artist">
+        Photo by
+        <a
+          href="${using_image.user.links.html}?utm_source=offhand_jaunt&utm_medium=referral"
+        >
+          ${using_image.user.name}
+        </a>
+        on
+        <a
+          href="https://unsplash.com/?utm_source=offhand_jaunt&utm_medium=referral"
+        >
+          Unsplash
+        </a>
+      </p>
+    </article>
+  </div>
+</section>
+{% endblock %}

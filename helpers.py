@@ -1,4 +1,10 @@
 import datetime
+import json
+
+# imports and reutrns data from iata_codes.json
+def read_iata_codes():
+    f = open("iata_codes.json")
+    return json.load(f)
 
 # properDate(now, d=1)
 # SET DATE

@@ -1,0 +1,124 @@
+{% extends 'base.html' %} {% block content %} {% if data.error.status %}
+<div class="container is-fluid mb-4">
+  <section class="hero is-danger">
+    <div class="hero-body">
+      <p class="title">Error</p>
+      <p class="subtitle">{{data.error.msg}}</p>
+    </div>
+  </section>
+</div>
+{% endif %}
+<div class="container is-fluid">
+  <div class="columns is-vcentered is-desktop">
+    <!-- IMAGE -->
+    <div class="column">
+      {% if data.img.src %}
+      <img id="quoteImg" src="{{ data.img.src }}" alt="Travel the world" />
+      {% else %}
+      <img
+        id="quoteImg"
+        src="{{url_for('static', filename='images/10051.jpg')}}"
+        alt="Travel the world"
+      />
+      {% endif %}
+    </div>
+    <!-- QUOTE -->
+    <div class="column">
+      <div class="tile is-ancestor">
+        <div class="tile is-parent">
+          <article class="tile is-child box">
+            <div class="columns">
+              <!-- DEPARTURE INFO -->
+              <div class="column">
+                <p class="title blue" id="home_city">
+                  {{ data.departure.name }}
+                </p>
+                <p class="subtitle" id="home_iata">
+                  <i class="fas fa-plane-departure"></i> {{ data.departure.iata
+                  }}
+                </p>
+                <p class="title is-4" id="home_country">
+                  {{ data.departure.country}}
+                </p>
+                <p class="subtitle is-6" id="start_date">
+                  Departure Date: {{ data.date.start }}
+                </p>
+              </div>
+              <div class="column is-one-fifth">
+                <p class="title is-5 cursive">
+                  <i class="fas fa-plane"></i> To
+                </p>
+              </div>
+              <!-- DESTINATION -->
+              <div class="column">
+                <p class="title blue" id="dest_city">
+                  {{ data.destination.name }}
+                </p>
+                <p class="subtitle" id="dest_iata">
+                  <i class="fas fa-plane-arrival"></i> {{ data.destination.iata
+                  }}
+                </p>
+                <p class="title is-4" id="dest_country">
+                  {{ data.destination.country }}
+                </p>
+                <p class="subtitle is-6" id="end_date">
+                  Return Date: {{ data.date.end }}
+                </p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+      <!-- COST -->
+      <div class="tile is-ancestor">
+        <div class="tile is-parent">
+          <article class="tile is-child box">
+            <div class="columns">
+              <div class="column">
+                <p class="title blue">Cost</p>
+                <p class="subtitle">Roundtrip, Per Traveler</p>
+              </div>
+              <div class="column">
+                <p class="title blue" id="price">${{ data.flight.price }}</p>
+                <p class="subtitle" id="carrier">
+                  By: {{ data.flight.carrier }}
+                </p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+      <!-- ACTIONS -->
+      <div class="tile is-ancestor">
+        <div class="tile is-parent">
+          <article class="tile is-child box">
+            <div class="buttons">
+              <button id="share" class="button is-fullwidth is-link">
+                Share
+              </button>
+
+              {% if user == None %}
+              <button class="button is-fullwidth is-info" disabled>
+                Mark as Visited
+              </button>
+              <button class="button is-fullwidth is-light" disabled>
+                Favorite
+              </button>
+              {% else %}
+              <button class="button is-fullwidth is-info">
+                Mark as Visited
+              </button>
+              <button class="button is-fullwidth is-light">Favorite</button>
+              {% endif %}
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container is-fluid mb-4"><br /></div>
+
+{% endblock %} {% block jsScript %}
+<script src="/static/flight.js" defer></script>
+{% endblock %}

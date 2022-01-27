@@ -1,17 +1,19 @@
 # standard libraries
 import json
 import datetime
+from os import stat
 
 # third party libraries
 from flask import Flask, render_template, redirect, session, jsonify, g, request, url_for
 from flask_cors import CORS
+from markupsafe import re
 import requests_oauthlib
 from requests_oauthlib.compliance_fixes import facebook_compliance_fix
 
 # local imports
-from models import Watching, connect_db, db, User, Viewed, Watching
-from validation import flight_api_query, random_choice, iata_data, image_api_query, DATABASE_URL, FLASK_KEY, FB_KEY, FB_ID
-from helpers import properDate
+from models import Watching, connect_db, db, User, Visited, Watching
+from validation import flight_api_query, random_iata, validateDates, validateIata, image_api_query, DATABASE_URL, FLASK_KEY, FB_KEY, FB_ID
+from helpers import properDate, read_iata_codes
 
 # Facebook Login
 FB_AUTHORIZATION_BASE_URL = "https://www.facebook.com/dialog/oauth"
@@ -32,6 +34,66 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
 app.config['SECRET_KEY'] = FLASK_KEY
 
 connect_db(app)
+
+# PENDING DELETE
+INITAL_FLIGHT = {
+  'error': { 'status': False, 'msg': "" },
+  'img': { 'url': "", 'info': "" },
+  'departure': {
+    'iata': "",
+    'name': "",
+    'country': "",
+  },
+  'destination': {
+    'iata': "",
+    'name': "",
+    'country': "",
+  },
+  'date': {
+    'start': "",
+    'end': "",
+  },
+  'flight': {
+    'price': "",
+    'carrier': "",
+  },
+}
+
+# PENDING DELETE
+INTIAL_USER = {
+    'name': "GUEST",
+    'error': { 'status': False, 'msg': "" },
+}
+
+# PENDING DELETE
+user = {
+    'name': "",
+    'error': { 'status': False, 'msg': "" },
+}
+
+# PENDING DELETE
+flight = {
+  'error': { 'status': False, 'msg': "" },
+  'img': { 'url': "", 'info': "" },
+  'departure': {
+    'iata': "",
+    'name': "",
+    'country': "",
+  },
+  'destination': {
+    'iata': "",
+    'name': "",
+    'country': "",
+  },
+  'date': {
+    'start': "",
+    'end': "",
+  },
+  'flight': {
+    'price': "",
+    'carrier': "",
+  },
+}
 
 @app.before_request
 def add_user_to_g():
@@ -68,60 +130,51 @@ def home():
     Returns:
         render_template: 'index.html'
     """
-    today = datetime.datetime.now()
+    return render_template('index.html', user= g.user )
 
-    x = properDate(datetime.datetime.now(), 1)
+@app.route('/flight/<departure>/<destination>/<start>/<end>/', methods=["GET"])
+def flight(departure, destination, start, end ):
+    """Renders flight information
 
-    print(x.strftime("%x"))
-    quote_data = {
-        "home" : {
-            "city" : "New York City",
-            "iata": "JFK",
-            "country": "USA",
-        },
-        "destination" : {
-            "city" : "London",
-            "iata": "LHR",
-            "country": "test",
-        }, 
-        "input" : {
-            "start": properDate(datetime.datetime.now(), 1).strftime("%x"),
-            "end": properDate().strftime("%x"),
-            "home": "test", 
-        }, 
-        "iata":"test",
-        "price":"test",
-        "carrier":"test",
-        "url": URL,
-    }
-
-    # user_input = { 
-    #         'home': quote_data['home']['city'],
-    #         'destination': destination,
-    #         'start': start,
-    #         'end': end,
-    #     }
-
-    # quote = json.loads(flight_api_query(user_input))
-    # print(quote)
-    return render_template('index.html', user = g.user, quote = quote_data)
-
-#SIGN OUT
-@app.route('/logout', methods = ['GET'])
-def logout():
-    """Renders Home Page
-
-    Removes user from g.user and session if user is logged in
-    Logged Out users will be redirected to /home
+    Displays enhanced user experience if user is logged in
+    Displays Guest home page if user is logged out
 
     Returns:
-        redirect: /home
+        render_template: 'quote.html'
     """
 
-    if g.user:
-        del session[CURR_USER_KEY]
+    response = {
+        'error': { 'status': False, 'msg': "" },
+        'img': { 'src': None, 'info': "" },
+        'departure': {
+            'iata': departure,
+            'name': "",
+            'country': "",
+        },
+        'destination': {
+            'iata': destination,
+            'name': "",
+            'country': "",
+        },
+        'date': {
+            'start': start,
+            'end': end,
+        },
+        'flight': {
+            'price': "",
+            'carrier': "",
+        },
+    }
 
-    return redirect('/home')
+    # validate dates
+    # validate dates, departure iata and destination iata
+    if validateDates(start, end) and validateIata(departure) and validateIata(destination):
+        flight_api_query(response)
+    else:
+        response['error']['status'] = True
+        response['error']['msg'] = "Invalid Request. Please verify your dates and IATA codes."
+
+    return render_template('flight.html', data= response, user= g.user)
 
 # LEGAL
 @app.route('/privacyPolicy', methods = ['GET'])
@@ -136,63 +189,20 @@ def show_privacy_policy():
 
     return render_template("privacy_policy.html", user = g.user)
 
-#SHARE FLIGHT
-@app.route('/share/<home>/<destination>/<start>/<end>')
-def share_link(home, destination, start, end):
-    user_input = { 
-            'home': home,
-            'destination': destination,
-            'start': start,
-            'end': end,
-        }
-    quote = json.loads(flight_api_query(user_input))
-    destination = quote['flight_data']['Places'][0]
-    if user_input['home'] == quote['flight_data']['Places'][0]['IataCode']:
-        destination = quote['flight_data']['Places'][1]
+@app.route('/request/iata', methods=["GET"])
+def get_iata():
+    """Obtains IATA Codes from iata_codes.json
 
-    image = (image_api_query(destination["CityName"]))
+    Get Request - no requirements
 
-#     quote = {
-#     "home" : {
-#         "city" : "",
-#         "iata": "",
-#         "country": "",
-#     },
-#     "destination" : {
-#         "city" : "",
-#         "iata": "",
-#         "country": "",
-#     }, 
-#     "input" : {
-#         "start": "",
-#         "end": "",
-#         "home": "", 
-
-#     }, 
-#     "iata":"",
-#     "price":"",
-#     "carrier":"",
-#     "url": URL,
-# }
-
-    quote_data = {
-        'input': user_input,
-        'city': destination['CityName'],
-        'country': destination['CountryName'],
-        'price': quote['flight_data']['Quotes'][0]['MinPrice'],
-        'iata': destination['IataCode'],
-        'carrier': quote['flight_data']['Carriers'][0]['Name'],
-        'image_url': image['results'][3]['urls']['regular'],
-        'image_by': image['results'][3]['user']['name'],
-        'image_attribute': image['results'][3]['user']['links']['html'],
-        'url': URL
-    }
-    return render_template('index.html', user = g.user, quote = quote_data)
-
+    Returns:
+        iata_codes.json
+    """
+    return read_iata_codes()
 
 # QUERY APIS 
-@app.route('/flight', methods=["POST"])
-def get_flight():
+@app.route('/request/flight', methods=["POST"])
+def request_flight():
     """Queries Flight API
 
     POST Request requires JSON { 
@@ -204,39 +214,93 @@ def get_flight():
             }
         }
     
-    Destination if 'Random' is set to a destination from data(arr from Validation)
-    if g.user: 
-        Destination cannot be in g.user.viewed
-        Destination is added to g.user.viewed to eliminate duplicate responses from API
-    Guest users are always given a random destination
+    TODO: 
+        if g.user - obtain users visited, generate random destination, search for it in visited.
+            if the destination is not in visited, return the destination. 
+            if the destination is found in visited generate new random destination and repeat 
+            this process.
 
-    Parameters are then passed to flight_api_query 
+        if not g.user- return a random destination. 
+    
+    if g.user: 
+        Destination cannot be in g.user.visited
+        Destination is added to g.user.visited to eliminate duplicate responses from API
+    Guest users are always given a random destination, previously visited destinations are not filtered out
 
     Returns:
-        JSON: flight_data (obj), user_data (str)
+        JSON {
+            'error': { 'status': False, 'msg': "" },
+            'img': { 'url': "", 'info': "" },
+            'departure': {
+                'iata': "",
+                'name': "",
+                'country': "",
+            },
+            'destination': {
+                'iata': "",
+                'name': "",
+                'country': "",
+            },
+            'date': {
+                'start': "",
+                'end': "",
+            },
+            'flight': {
+                'price': "",
+                'carrier': "",
+            },
+        }
     """
 
-    resp = request.json['data']
+    # TODO
+    # ADD handling for previously visited locations
     
-    destination = random_choice(iata_data)
-    user = "Guest"
+    # collect data from POST request 
+    req = request.json['data']
+
+    # initiate response, fill in data from req
+    random = random_iata()
 
     if g.user:
-        user = g.user.email
-        viewed = [l.iata for l in g.user.viewed]
-        while destination in viewed:
-            destination = random_choice(iata_data)
-        add_dest = Viewed(user = g.user.email, location = destination)
-        db.session.add(add_dest)
+        visited = set((g.user.visited))
+        while random in visited:
+            random = random_iata();
+        
+        visited= Visited(
+            user = g.user.email,
+            location = random,
+        )
+
+        db.session.add(visited)
         db.session.commit()
+    
+    response = {
+            'error': { 'status': False, 'msg': "" },
+            'img': { 'url': "", 'info': "" },
+            'departure': {
+                'iata': req['departure']['iata'],
+                'name': req['departure']['name'],
+                'country': "",
+            },
+            'destination': {
+                'iata': random,
+                'name': "",
+                'country': "",
+            },
+            'date': {
+                'start': req['date']['start'],
+                'end': req['date']['end'],
+            },
+            'flight': {
+                'price': "",
+                'carrier': "",
+            },
+        }
 
-    if resp['destination'] == 'Random':
-        resp['destination'] = destination
-
-    if resp['home'] in iata_data:
-        return flight_api_query(resp, user)
-    return jsonify(error = True)
-
+    return jsonify(response)
+    
+# this should be included in /request/flight
+# PENDING DELETE
 @app.route('/image', methods = ["POST"])
 def get_destination_image():
     """Queries IMAGE API
@@ -252,6 +316,30 @@ def get_destination_image():
     resp = request.json['data']
     return image_api_query(resp)
 
+
+# 
+# PENDING DELETE
+@app.route('/request/user', methods = ["POST"])
+def get_destination_image2():
+    """Queries if there is a user
+
+    POST Request, No requirements
+
+    Returns:
+        JSON: {
+            'name': "",
+            'error': { 
+                'status': False, 
+                'msg': "" 
+            },
+        }
+    """
+# identify if there is a user
+# return JSON of user
+
+   
+
+
 # USER FUNCTIONALITY
 @app.route('/user', methods=["GET"])
 def user_profile():
@@ -260,7 +348,7 @@ def user_profile():
     Logged Out Users are redirected to /home
     Logged In Users are shown the following 
         Watching (arr) - Listed of *active* flights user is watching (if len(arr) > 0)
-        Viewed (arr) - Listed of locations user has seen or visited (if len(arr) > 0)
+        visited (arr) - Listed of locations user has seen or visited (if len(arr) > 0)
     
     *active flights are determined by comparing today's date to the start date of the flight
     expired flights are removed from the user's profile and are not shown on this page*
@@ -271,44 +359,46 @@ def user_profile():
     """
 
     if g.user:
-        d = datetime.utcnow()
-        time = f"{d.strftime('%Y')}{d.strftime('%m')}{d.strftime('%d')}"
+        # d = datetime.utcnow()
+        # time = f"{d.strftime('%Y')}{d.strftime('%m')}{d.strftime('%d')}"
         all_watching = Watching.query.filter_by(user = g.user.email).all()
-        current = []
-        for s in all_watching:
-            a = s.start.split('-')
-            seperator= ''
-            b = seperator.join(a)
-            if int(b) < int(time):
-                old = Watching.query.filter_by(id = s.id).first()
-                db.session.delete(old)
-                db.session.commit()
-            else:
-                current.append(s)
+        # current = []
+        # for s in all_watching:
+        #     a = s.start.split('-')
+        #     seperator= ''
+        #     b = seperator.join(a)
+        #     if int(b) < int(time):
+        #         old = Watching.query.filter_by(id = s.id).first()
+        #         db.session.delete(old)
+        #         db.session.commit()
+        #     else:
+        #         current.append(s)
 
-        return render_template('user.html', user = g.user, length = len(g.user.viewed), all_watching_length = len(all_watching), watching = current)
+        return render_template('user.html', user = g.user, length = len(g.user.visited), all_watching_length = len(all_watching), watching = all_watching)
     return redirect('/home')
 
-@app.route('/resetViewedVisited', methods = ["GET"])
-def reset_viewed_visited():
-    """Removes all Viewed/Visited Locations from the user's profile
+# THIS SHOULD BE A POST REQUEST
+@app.route('/resetvisitedVisited', methods = ["GET"])
+def reset_visited_visited():
+    """Removes all visited/Visited Locations from the user's profile
 
     Logged Out Users are redirected to /home
-    Logged In Users have their viewed removed then are redirected to /user
+    Logged In Users have their visited removed then are redirected to /user
     Returns:
         Logged In Users: redirect: /user
         Logged Out Users: redirect: /home
     """
 
     if g.user:
-        user_viewed = Viewed.query.filter_by(user = g.user.email).all()
-        for view in user_viewed:
+        user_visited = visited.query.filter_by(user = g.user.email).all()
+        for view in user_visited:
             db.session.delete(view)
             db.session.commit()
         return redirect('/user')
     return redirect('/home')
 
 # WATCH FLIGHT
+# MODIFY TO ADD FAVORITE
 @app.route("/watchFlight", methods = ["POST"])
 def add_watched_flight():
     """Adds Flight to user's Watching
@@ -364,6 +454,7 @@ def add_watched_flight():
 
     return redirect('/home')
 
+# MODIFY TO REMOVE FAVORITE
 @app.route('/removeWatching', methods = ["POST"])
 def remove_watched():
     """Removes flight from user's watching
@@ -388,6 +479,8 @@ def remove_watched():
         return redirect('/user')
     return redirect('/home')
 
+# MODIFY TO READ FAVORITES
+# MODIFY TO GET REQUEST
 @app.route('/watchingData', methods = ['POST'])
 def obtain_watching_data():
     """Obtains Data on a Flight in User's Watching
@@ -416,6 +509,7 @@ def obtain_watching_data():
         return jsonify(data = watched_flight_data)
     return redirect('/home')
 
+# PENDING DELETE
 @app.route("/updateWatching", methods = ["POST"])
 def update_watching_flight():
     """Obtains Data on a Flight in User's Watching
@@ -442,6 +536,21 @@ def update_watching_flight():
         change = old_price >= watched_flight.price
         return jsonify(increase = change, price = watched_flight.price)
     return redirect('/home')
+
+
+# LOGIN PAGE
+@app.route('/login')
+def login():
+    """Begins Login Process
+
+    Returns:
+        redirect: login.html
+    """
+
+    if not g.user:
+        return render_template('login.html', user= g.user)
+
+    return redirect(url_for('user_profile'))
 
 # FACEBOOK LOGIN
 @app.route('/fb-login')
@@ -490,8 +599,6 @@ def callback():
         "https://graph.facebook.com/me?fields=id,name,email,picture{url}"
     ).json()
 
-    print(facebook_user_data)
-
 
 
     email = facebook_user_data["email"]
@@ -509,4 +616,20 @@ def callback():
     session[CURR_USER_KEY] = user.email
     return redirect('/home')
 
+#SIGN OUT
+@app.route('/logout', methods = ['GET'])
+def logout():
+    """Renders Home Page
+
+    Removes user from g.user and session if user is logged in
+    Logged Out users will be redirected to /home
+
+    Returns:
+        redirect: /home
+    """
+
+    if g.user:
+        del session[CURR_USER_KEY]
+
+    return redirect('/home')
 # TODO: CREATE 404 page

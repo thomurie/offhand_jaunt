@@ -1,18 +1,17 @@
-/* COLOR PALLETE https://coolors.co/162e6b-c1c6d4-606475-485fc7-384b7a */
-
 /* NAVBAR */
-h1.title {
-  color: #485fc7;
-}
 
-#from {
-  color: white;
+.cursive {
+  font-family: "Pacifico", cursive;
+  color: #5d7aff;
 }
 
 /* HEADER */
-section.hero {
-  background-position: bottom right;
-  background-size: 100%;
+
+#heroImg {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  height: 50vh;
 }
 
 @media only screen and (max-width: 400px) {
@@ -22,8 +21,17 @@ section.hero {
 }
 
 /* QUOTE */
-section#quote {
-  background-color: #485fc7;
+#quoteImg {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 20px;
+  width: 100%;
+  height: auto;
+}
+
+.blue {
+  color: #5d7aff;
 }
 
 /* FOOTER */
@@ -33,12 +41,4 @@ footer.footer {
 footer p.title,
 footer p.subtitle {
   color: white;
-}
-
-/* COMPONENTS */
-.button.is-primary {
-  background-color: #162e6b;
-}
-.button.is-primary:hover {
-  background-color: #12275a;
 }
